@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VortexMC – A modern, fast, secure Minecraft launcher</title>
+<meta name="description" content="VortexMC is a free Minecraft launcher for Windows and Linux with Fabric, Quilt, Forge, NeoForge and Horizon support.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%23101826'/><path d='M50 14 84 32v36L50 86 16 68V32z' fill='%236fcf4a'/><path d='M50 50 84 32M50 50v36M50 50 16 32' stroke='%23101826' stroke-width='5' fill='none'/></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;700;800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0f1624; --bg2:#151e31; --card:#1a2540; --line:#2a3858;
+  --ink:#eef2fb; --muted:#9fabc6; --grass:#6fcf4a; --grass-d:#3f8f2a; --dirt:#9a6a42; --dirt-d:#74502f; --sky:#59b4ff;
+}
+*{box-sizing:border-box;margin:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.65 "DM Sans",system-ui,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--sky);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1080px;margin:0 auto;padding:0 24px}
+h1,h2,h3{font-family:"Sora",sans-serif;line-height:1.15;letter-spacing:-.02em}
+code{background:#0b1220;border:1px solid var(--line);padding:1px 7px;border-radius:6px;font-size:.9em}
+
+/* buttons */
+.btn{position:relative;overflow:hidden;display:inline-block;padding:15px 28px;border-radius:12px;font-weight:700;text-decoration:none;transition:transform .2s,box-shadow .2s}
+.btn.go{background:linear-gradient(180deg,#7fe05a,var(--grass-d));color:#08210a;box-shadow:0 0 0 0 rgba(111,207,74,.5),0 8px 28px rgba(111,207,74,.25);animation:pulse 3s ease-in-out infinite}
+.btn.go::after{content:"";position:absolute;top:0;left:-80%;width:50%;height:100%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg)}
+.btn.go:hover::after{left:140%;transition:left .7s}
+.btn:hover{transform:translateY(-3px)}
+.btn.ghost{border:1.5px solid var(--line);background:rgba(255,255,255,.03)}
+.btn.ghost:hover{border-color:var(--sky);background:rgba(89,180,255,.08)}
+@keyframes pulse{50%{box-shadow:0 0 0 10px rgba(111,207,74,0),0 8px 40px rgba(111,207,74,.45)}}
+
+/* nav */
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 0;position:relative;z-index:3}
+.logo{font:800 20px "Sora",sans-serif;text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo svg{width:28px;height:28px}
+nav a.link{color:var(--muted);text-decoration:none;font-weight:500}
+nav a.link:hover{color:var(--ink)}
+
+/* hero */
+.hero{position:relative;overflow:hidden}
+.glow{position:absolute;border-radius:50%;filter:blur(90px);opacity:.5;z-index:0;pointer-events:none;animation:drift 14s ease-in-out infinite alternate}
+.glow.a{width:480px;height:480px;background:#2a6bd6;left:-120px;top:-120px}
+.glow.b{width:420px;height:420px;background:#2f9a3a;right:-80px;top:120px;animation-delay:-6s}
+@keyframes drift{to{transform:translate(60px,40px) scale(1.15)}}
+.hero-in{position:relative;z-index:2;display:grid;grid-template-columns:1.1fr .9fr;gap:20px;align-items:center;padding:56px 0 110px}
+h1{font-size:clamp(40px,7vw,76px);font-weight:800;margin-bottom:22px}
+h1 .l{display:block}
+.lead{color:var(--muted);font-size:20px;max-width:480px;margin-bottom:34px}
+.btns{display:flex;gap:14px;flex-wrap:wrap}
+.meta{margin-top:20px;color:var(--muted);font-size:15px}
+/* page-load sequence */
+.in{opacity:0;transform:translateY(26px);animation:up .8s cubic-bezier(.2,.8,.2,1) forwards;animation-delay:calc(var(--i)*.12s)}
+@keyframes up{to{opacity:1;transform:none}}
+
+/* blocks scene */
+.scene{position:relative;height:420px;perspective:900px}
+.float{position:absolute;animation:bob 6s ease-in-out infinite;animation-delay:var(--d)}
+.cube{--s:90px;position:relative;width:var(--s);height:var(--s);transform-style:preserve-3d;animation:turn 22s linear infinite;animation-delay:var(--d)}
+.cube i{position:absolute;inset:0;border:2px solid rgba(0,0,0,.35);
+  background:
+    linear-gradient(45deg,rgba(0,0,0,.12) 25%,transparent 25% 75%,rgba(0,0,0,.12) 75%) 0 0/25% 25%,
+    var(--c)}
+.cube .t{--c:var(--grass);transform:rotateX(90deg) translateZ(calc(var(--s)/2))}
+.cube .d{--c:#5c3f27;transform:rotateX(-90deg) translateZ(calc(var(--s)/2))}
+.cube .f{--c:var(--dirt);transform:translateZ(calc(var(--s)/2))}
+.cube .k{--c:var(--dirt-d);transform:rotateY(180deg) translateZ(calc(var(--s)/2))}
+.cube .r{--c:#85593a;transform:rotateY(90deg) translateZ(calc(var(--s)/2))}
+.cube .l{--c:#85593a;transform:rotateY(-90deg) translateZ(calc(var(--s)/2))}
+.cube .f::before,.cube .r::before,.cube .l::before,.cube .k::before{content:"";position:absolute;left:0;right:0;top:0;height:28%;background:var(--grass-d)}
+@keyframes turn{from{transform:rotateX(-24deg) rotateY(0)}to{transform:rotateX(-24deg) rotateY(360deg)}}
+@keyframes bob{50%{transform:translateY(-22px)}}
+
+/* sections */
+section{padding:90px 0}
+section.alt{background:var(--bg2);border-block:1px solid var(--line)}
+h2{font-size:clamp(28px,4.4vw,42px);margin-bottom:14px;max-width:640px}
+.sub{color:var(--muted);max-width:560px;margin-bottom:44px}
+
+/* scroll reveal */
+.js .rv{opacity:0;transform:translateY(28px);transition:opacity .7s ease,transform .7s cubic-bezier(.2,.8,.2,1);transition-delay:calc(var(--n,0)*80ms)}
+.js .rv.show{opacity:1;transform:none}
+
+/* highlights */
+.hl{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.hc{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;transition:transform .25s,border-color .25s}
+.hc:hover{transform:translateY(-6px);border-color:var(--grass)}
+.hc.big{grid-column:span 2;background:linear-gradient(135deg,#1c2c4d,#1a3a2a)}
+.hc h3{font-size:19px;margin:14px 0 8px}
+.hc p{color:var(--muted)}
+.ic{font-size:28px;display:inline-block;transition:transform .3s}
+.hc:hover .ic{transform:rotate(-12deg) scale(1.2)}
+
+/* feature tabs */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:26px}
+.tab{font:600 15px "DM Sans",sans-serif;color:var(--muted);background:transparent;border:1.5px solid var(--line);border-radius:999px;padding:9px 18px;cursor:pointer;transition:.2s}
+.tab:hover{color:var(--ink);border-color:var(--muted)}
+.tab[aria-selected=true]{background:var(--grass);border-color:var(--grass);color:#08210a}
+.pane{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px;min-height:290px}
+.pane ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:4px 36px}
+.pane li{position:relative;padding:8px 0 8px 28px;border-bottom:1px solid rgba(255,255,255,.05);animation:pop .45s both;animation-delay:calc(var(--k)*50ms)}
+.pane li::before{content:"";position:absolute;left:2px;top:17px;width:11px;height:11px;background:var(--grass);box-shadow:inset -3px -3px 0 var(--grass-d);border-radius:2px}
+@keyframes pop{from{opacity:0;transform:translateX(-14px)}}
+
+/* install */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start}
+table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:24px}
+th,td{padding:14px 18px;text-align:left;background:var(--card)}
+th{color:var(--muted);font-weight:500;font-size:15px;background:#141d33}
+tr+tr td{border-top:1px solid var(--line)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px}
+.box h3{font-size:18px;margin-bottom:12px}
+.box ul{padding-left:20px;color:var(--muted)}
+.box li{margin-bottom:8px}
+.small{color:var(--muted);font-size:15px}
+
+/* steps */
+.steps{list-style:none;counter-reset:s;max-width:680px;position:relative}
+.steps::before{content:"";position:absolute;left:23px;top:10px;bottom:10px;width:2px;background:var(--line)}
+.steps li{counter-increment:s;display:grid;grid-template-columns:48px 1fr;gap:20px;align-items:center;padding:12px 0;position:relative}
+.steps li::before{content:counter(s);width:48px;height:48px;border-radius:12px;display:grid;place-items:center;background:var(--grass);color:#08210a;font:800 18px "Sora",sans-serif;position:relative;z-index:1}
+.steps b{color:var(--grass)}
+.note{margin-top:40px;border:1px solid var(--line);border-left:4px solid #f2b45a;border-radius:14px;background:var(--card);padding:20px 24px;max-width:760px;color:var(--muted)}
+.note b{color:#f2b45a}
+a.t{color:var(--sky)}
+
+footer{border-top:1px solid var(--line);padding:44px 0;color:var(--muted);font-size:15px}
+footer p+p{margin-top:12px}
+
+@media(max-width:820px){
+  .hero-in{grid-template-columns:1fr;padding-bottom:60px}
+  .scene{height:300px;order:2;transform:scale(.8)}
+  .hl{grid-template-columns:1fr}.hc.big{grid-column:auto}
+  .cols{grid-template-columns:1fr}.pane ul{grid-template-columns:1fr}
+}
+@media(prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation:none!important;transition:none!important}
+  .in,.js .rv{opacity:1;transform:none}html{scroll-behavior:auto}
+}
+</style>
+</head>
+<body>
+<script>document.documentElement.classList.add('js')</script>
+
+<header class="hero">
+  <div class="glow a"></div><div class="glow b"></div>
+  <div class="wrap">
+    <nav>
+      <a class="logo" href="#top"><svg viewBox="0 0 100 100" aria-hidden="true"><path d="M50 8 90 29v42L50 92 10 71V29z" fill="#6fcf4a"/><path d="M50 50 90 29M50 50v42M50 50 10 29" stroke="#0f1624" stroke-width="6" fill="none"/></svg>VortexMC</a>
+      <a class="link" href="https://github.com/PABLO-EXT0/VortexMC-releases">GitHub</a>
+    </nav>
+    <div class="hero-in" id="top">
+      <div>
+        <h1 class="in" style="--i:0"><span class="l">Minecraft,</span><span class="l">launched</span><span class="l">your way.</span></h1>
+        <p class="lead in" style="--i:1">A modern, fast, secure launcher for Windows and Linux. Mods, modpacks and shaders in one place.</p>
+        <div class="btns in" style="--i:2">
+          <a class="btn go" href="https://github.com/PABLO-EXT0/VortexMC-releases/releases/latest">Download</a>
+          <a class="btn ghost" href="#features">See features</a>
+        </div>
+        <p class="meta in" style="--i:3">Free · Windows and Linux · No telemetry</p>
+      </div>
+      <div class="scene in" style="--i:2" aria-hidden="true">
+        <div class="float" style="left:18%;top:26%;--d:0s"><div class="cube" style="--s:120px"><i class="t"></i><i class="d"></i><i class="f"></i><i class="k"></i><i class="r"></i><i class="l"></i></div></div>
+        <div class="float" style="left:62%;top:6%;--d:-2s"><div class="cube" style="--s:70px;--d:-5s"><i class="t"></i><i class="d"></i><i class="f"></i><i class="k"></i><i class="r"></i><i class="l"></i></div></div>
+        <div class="float" style="left:68%;top:56%;--d:-4s"><div class="cube" style="--s:90px;--d:-9s"><i class="t"></i><i class="d"></i><i class="f"></i><i class="k"></i><i class="r"></i><i class="l"></i></div></div>
+        <div class="float" style="left:6%;top:70%;--d:-1s"><div class="cube" style="--s:50px;--d:-13s"><i class="t"></i><i class="d"></i><i class="f"></i><i class="k"></i><i class="r"></i><i class="l"></i></div></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section>
+    <div class="wrap">
+      <h2 class="rv">Why VortexMC</h2>
+      <p class="sub rv" style="--n:1">Everything you need to play, without the clutter.</p>
+      <div class="hl">
+        <div class="hc big rv"><span class="ic">🧱</span><h3>One place for everything</h3><p>Vanilla, Fabric, Quilt, Forge, NeoForge and Horizon instances side by side.</p></div>
+        <div class="hc rv" style="--n:1"><span class="ic">🔎</span><h3>Discover</h3><p>Search Modrinth and CurseForge together for mods, modpacks, shaders, resource packs and data packs.</p></div>
+        <div class="hc rv"><span class="ic">🛠️</span><h3>Fixes before you launch</h3><p>It tells you what will break, highlights it, and fixes it in one click.</p></div>
+        <div class="hc rv" style="--n:1"><span class="ic">⚙️</span><h3>Horizon support</h3><p>The Rust rewrite of Minecraft Java, with native mod preparation and no official Horizon launcher.</p></div>
+        <div class="hc rv" style="--n:2"><span class="ic">✨</span><h3>Looks alive</h3><p>Liquid glass themes, custom presets and a 3D skin that follows your cursor.</p></div>
+        <div class="hc big rv"><span class="ic">🛡️</span><h3>Secure by default</h3><p>Hash-checked downloads, signed updates, and no telemetry.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt" id="features">
+    <div class="wrap">
+      <h2 class="rv">Features</h2>
+      <p class="sub rv" style="--n:1">Pick a category to see what is inside.</p>
+      <div class="tabs rv" role="tablist" id="tabs"></div>
+      <div class="pane rv" id="pane" role="tabpanel"></div>
+    </div>
+  </section>
+
+  <section id="install">
+    <div class="wrap">
+      <h2 class="rv">Install</h2>
+      <p class="sub rv" style="--n:1">Download the latest build for your system from the Releases page.</p>
+      <div class="cols">
+        <div class="rv">
+          <table>
+            <tr><th>System</th><th>Download</th></tr>
+            <tr><td>Windows</td><td>The installer (.exe)</td></tr>
+            <tr><td>Linux</td><td>The AppImage or archive</td></tr>
+          </table>
+          <a class="btn go" href="https://github.com/PABLO-EXT0/VortexMC-releases/releases/latest">Get the latest build</a>
+          <p class="small" style="margin-top:18px">macOS is not officially supported yet.</p>
+        </div>
+        <div class="box rv" style="--n:1"><h3>Requirements</h3><ul>
+          <li>No Java needed. VortexMC downloads the right one for each Minecraft version.</li>
+          <li>Windows: Microsoft Edge WebView2 (already on current Windows 10 and 11).</li>
+          <li>Linux: GTK and WebKitGTK. On Debian and Ubuntu that is usually <code>python3-gi</code> and <code>gir1.2-webkit2-4.1</code>.</li>
+        </ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="alt">
+    <div class="wrap">
+      <h2 class="rv">Getting started</h2>
+      <ol class="steps" style="margin-top:34px">
+        <li class="rv">Open VortexMC and finish the <span><b>first-run setup</b>.</span></li>
+        <li class="rv" style="--n:1">Sign in with Microsoft, or use an <span><b>offline profile</b>.</span></li>
+        <li class="rv" style="--n:2">Create an <span><b>instance</b>: pick a version and a loader, or Horizon.</span></li>
+        <li class="rv" style="--n:3">Open <span><b>Discover</b> to add mods, shaders and packs, then press <b>Launch</b>.</span></li>
+      </ol>
+      <div class="note rv"><b>About Horizon.</b> Horizon support is an unofficial, experimental integration with the independent <a class="t" href="https://github.com/horizon-rust/horizon">Horizon</a> project. For now multiplayer is offline-only, Java mods do not run on Horizon, and native Horizon mods are compiled on your machine, so VortexMC asks you to confirm before it builds any. VortexMC is not affiliated with the Horizon project.</div>
+    </div>
+  </section>
+
+  <section>
+    <div class="wrap">
+      <div class="cols">
+        <div class="box rv"><h3>Contributing</h3><p class="small" style="font-size:17px">Issues and pull requests are welcome. Reach out on Discord for more information.</p></div>
+        <div class="box rv" style="--n:1"><h3>License</h3><p class="small" style="font-size:17px">MIT. Third-party notices are included in the repository.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <p><b>VortexMC is an independent project.</b> It is not affiliated with, endorsed by or connected to Mojang AB, Microsoft or Minecraft. "Minecraft" is a trademark of Mojang. VortexMC never bundles Minecraft files: game files are downloaded from Mojang's official servers, and you must own Minecraft and accept the <a class="t" href="https://www.minecraft.net/eula">Minecraft EULA</a> to play online.</p>
+    <p>Thanks to Modrinth and CurseForge for their APIs, to the Horizon project, and to the authors of the open-source libraries, fonts and icons VortexMC uses.</p>
+    <p><a class="t" href="https://github.com/PABLO-EXT0/VortexMC-releases">github.com/PABLO-EXT0/VortexMC-releases</a></p>
+  </div>
+</footer>
+
+<script>
+const F={
+ "Launcher":["Instances for any Minecraft version","Live console output, one-click launch","Java found or downloaded for you","Parallel, resumable, hash-verified downloads","Shared asset and library cache","Undo toasts and a trash folder","Hover prefetch restores your last page","Command palette, tray and self-updater"],
+ "Loaders & Horizon":["Vanilla, Fabric, Quilt, Forge, NeoForge","Switchable loader versions","Horizon instances with native mod prep","Registry browser","Updates with rollback","Mod sets and Safe mode","<code>.hpack</code> modpacks","Horizon screenshots tab"],
+ "Content":["Filters for version, loader, category, source","One-click installs with dependencies","Enable, disable, update all, switch versions","Duplicate and dependency warnings","Resource pack and shader manager","Modpack install, update, export","Import from .minecraft, Prism, MultiMC","Drag-to-reorder and presets"],
+ "Health":["Repair instance re-downloads game files","Pre-launch check with red, amber, blue flags","One-click fixes and launch gating","Crash analyzer names the likely culprit mod","Health badge on every instance"],
+ "Performance":["Fast mode and performance presets","JVM presets and RAM recommendations","Lazy-loaded pages and virtualized lists","Cached API responses"],
+ "Look & feel":["Dark, light, AMOLED and liquid glass themes","Custom theme editor and presets","Per-instance appearance if you want","Reduced-motion and Lite modes","3D skin over a panorama background","Keyboard navigation and high-contrast mode"],
+ "Accounts & worlds":["Multiple accounts with a switcher","Microsoft sign-in or offline profile","World list, backup and restore","Screenshots gallery","Server list with ping and MOTD","Discord rich presence"],
+ "Security":["HTTPS-only downloads from trusted hosts","Every file checked against its hash","Path and archive safety checks","Ed25519-signed updates","Tokens kept in the OS keyring","Logs and exports redacted","Security center and audit log"]
+};
+const tabs=document.getElementById('tabs'),pane=document.getElementById('pane');
+function show(name){
+  [...tabs.children].forEach(b=>b.setAttribute('aria-selected',b.dataset.n===name));
+  pane.innerHTML='<ul>'+F[name].map((t,i)=>`<li style="--k:${i}">${t}</li>`).join('')+'</ul>';
+}
+Object.keys(F).forEach((n,i)=>{
+  const b=document.createElement('button');b.className='tab';b.dataset.n=n;b.textContent=n;b.setAttribute('role','tab');
+  b.onclick=()=>show(n);tabs.appendChild(b);
+});
+show("Launcher");
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('show');io.unobserve(e.target)}}),{threshold:.15});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
