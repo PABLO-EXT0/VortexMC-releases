@@ -133,7 +133,7 @@ h2{font-size:clamp(30px,4.4vw,44px);margin-bottom:14px;max-width:640px}
 .tab{position:relative;z-index:1;font:500 15px var(--font-sans);color:var(--text-2);background:transparent;border:0;border-radius:var(--radius-sm);height:36px;padding:0 14px;cursor:pointer;transition:color var(--d-fast)}
 .tab:hover{color:var(--text-1)}
 .tab[aria-selected=true]{color:var(--accent-text);font-weight:600}
-.pill{position:absolute;z-index:0;border-radius:var(--radius-sm);background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent);transition:transform var(--d-slow) var(--spring),width var(--d-slow) var(--spring),height var(--d-slow) var(--spring)}
+.pill{position:absolute;top:0;left:0;z-index:0;border-radius:var(--radius-sm);background:var(--accent-soft);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent);transition:transform var(--d-slow) var(--spring),width var(--d-slow) var(--spring),height var(--d-slow) var(--spring)}
 .pane{background:var(--bg);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;min-height:280px}
 .pane ul{list-style:none;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:0 36px}
 .pane li{display:flex;gap:12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--border);animation:pop 360ms var(--ease-out) both;animation-delay:calc(min(var(--k),7)*40ms)}
